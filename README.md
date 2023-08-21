@@ -1,4 +1,3 @@
-```markdown
 # Simple Vue 3 App with Cornerstone3D DICOM P10 Example
 
 This repository contains a simple Vue 3 application that utilizes Cornerstone3D to display DICOM P10 files from the local file system. It wraps the Cornerstone3D library with Vue components to provide an interactive and user-friendly interface for viewing medical images.
