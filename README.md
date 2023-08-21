@@ -56,4 +56,3 @@ This project is licensed under the [MIT License](LICENSE).
 - DICOM P10 files are widely used in the medical imaging field for storing and exchanging medical images.
 
 Feel free to customize this README to better suit your project's specific details and requirements.
-```
