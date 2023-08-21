@@ -8,7 +8,14 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@cornerstonejs/calculate-suv": "^1.0.3",
+    "@cornerstonejs/core": "^1.10.4",
+    "@cornerstonejs/dicom-image-loader": "^1.10.4",
+    "@cornerstonejs/streaming-image-volume-loader": "^1.10.4",
+    "@cornerstonejs/tools": "^1.10.4",
     "core-js": "^3.8.3",
+    "dcmjs": "^0.29.8",
+    "dicomweb-client": "^0.10.3",
     "vue": "^3.2.13"
   },
   "devDependencies": {
