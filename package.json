@@ -1,5 +1,5 @@
 {
-  "name": "monai",
+  "name": "vue-cornerstone3d-dicom-example",
   "version": "0.1.0",
   "private": true,
   "scripts": {
