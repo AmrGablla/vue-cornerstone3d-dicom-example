@@ -1,15 +1,22 @@
 <template>
+  <button :hidden="!loaeded" @click="toggleLengthTool">Length Tool</button>
+
   <input
     type="file"
     id="selectFile"
     style="margin-bottom: 20px"
     @change="handleFileChange"
   />
-  <div id="content"></div>
+  <div id="content" @dblclick="dblclickHanlder"></div>
 </template>
 
 <script>
-import { RenderingEngine, Enums, metaData } from "@cornerstonejs/core";
+import {
+  RenderingEngine,
+  Enums,
+  metaData,
+  eventTarget,
+} from "@cornerstonejs/core";
 import cornerstoneDICOMImageLoader from "@cornerstonejs/dicom-image-loader";
 import * as cornerstoneTools from "@cornerstonejs/tools";
 import uids from "../uids";
@@ -24,6 +31,7 @@ const {
   WindowLevelTool,
   StackScrollMouseWheelTool,
   ZoomTool,
+  LengthTool,
   ToolGroupManager,
   Enums: csToolsEnums,
 } = cornerstoneTools;
@@ -38,6 +46,8 @@ export default {
       toolGroupId: "myToolGroup",
       viewport: null,
       element: null,
+      toolGroup: null,
+      loaeded: false,
     };
   },
   async mounted() {
@@ -85,8 +95,59 @@ export default {
     dropZone.addEventListener("drop", this.handleFileSelect, false);
 
     await this.run();
+    this.eventHandlers();
   },
   methods: {
+    renderAnnotaions() {
+      const annotation = localStorage.getItem("annotation");
+      if (annotation) {
+        cornerstoneTools.annotation.state.addAnnotation(
+          JSON.parse(annotation),
+          this.viewport.element
+        );
+      }
+    },
+    eventHandlers() {
+      eventTarget.addEventListener(
+        cornerstoneTools.Enums.Events.ANNOTATION_ADDED,
+        (csToolsEvent) => {
+          console.log("ANNOTATION_ADDED");
+          const annotationAddedEventDetail = csToolsEvent.detail;
+          console.log(annotationAddedEventDetail);
+        }
+      );
+
+      eventTarget.addEventListener(
+        cornerstoneTools.Enums.Events.ANNOTATION_COMPLETED,
+        (csToolsEvent) => {
+          console.log("ANNOTATION_COMPLETED");
+          const annotationAddedEventDetail = csToolsEvent.detail;
+          console.log(annotationAddedEventDetail);
+          localStorage.setItem(
+            "annotation",
+            JSON.stringify(annotationAddedEventDetail.annotation)
+          );
+        }
+      );
+
+      eventTarget.addEventListener(
+        cornerstoneTools.Enums.Events.ANNOTATION_MODIFIED,
+        (csToolsEvent) => {
+          console.log("ANNOTATION_MODIFIED");
+          const annotationAddedEventDetail = csToolsEvent.detail;
+          console.log(annotationAddedEventDetail);
+        }
+      );
+
+      eventTarget.addEventListener(
+        cornerstoneTools.Enums.Events.ANNOTATION_REMOVED,
+        (csToolsEvent) => {
+          console.log("ANNOTATION_REMOVED");
+          const annotationAddedEventDetail = csToolsEvent.detail;
+          console.log(annotationAddedEventDetail);
+        }
+      );
+    },
     handleFileChange(e) {
       const file = e.target.files[0];
       const imageId = cornerstoneDICOMImageLoader.wadouri.fileManager.add(file);
@@ -107,6 +168,17 @@ export default {
 
       metadata.appendChild(row);
     },
+    toggleLengthTool() {
+      this.toolGroup.setToolPassive(WindowLevelTool.toolName);
+
+      this.toolGroup.setToolActive(LengthTool.toolName, {
+        bindings: [
+          {
+            mouseButton: MouseBindings.Primary,
+          },
+        ],
+      });
+    },
     async run() {
       // Init Cornerstone and related libraries
       await initDemo();
@@ -115,6 +187,7 @@ export default {
       cornerstoneTools.addTool(WindowLevelTool);
       cornerstoneTools.addTool(StackScrollMouseWheelTool);
       cornerstoneTools.addTool(ZoomTool);
+      cornerstoneTools.addTool(LengthTool);
 
       // Define a tool group, which defines how mouse events map to tool commands for
       // Any viewport using the group
@@ -125,9 +198,11 @@ export default {
       toolGroup.addTool(PanTool.toolName);
       toolGroup.addTool(ZoomTool.toolName);
       toolGroup.addTool(StackScrollMouseWheelTool.toolName);
+      toolGroup.addTool(LengthTool.toolName);
 
       // Set the initial state of the tools, here all tools are active and bound to
       // Different mouse inputs
+      toolGroup.setToolPassive(LengthTool.toolName);
       toolGroup.setToolActive(WindowLevelTool.toolName, {
         bindings: [
           {
@@ -176,6 +251,7 @@ export default {
       this.viewport = renderingEngine.getViewport(viewportId);
 
       toolGroup.addViewport(viewportId, renderingEngineId);
+      this.toolGroup = toolGroup;
     },
     handleFileSelect(evt) {
       console.log(evt);
@@ -252,7 +328,16 @@ export default {
           voiLutModule.windowCenter;
         document.getElementById("windowwidth").innerHTML =
           voiLutModule.windowWidth;
+
+        this.loaeded = true;
+        this.renderAnnotaions();
       });
+    },
+    dblclickHanlder(e) {
+      console.log(e);
+      const content = document.getElementById("content");
+      content.style.display = "none";
+      console.log("display updated");
     },
   },
 };
